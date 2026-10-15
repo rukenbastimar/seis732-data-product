@@ -50,23 +50,23 @@ One row represents one recorded Citi Bike trip. The table does not contain an ex
 
  ## Current row count (verified through schema)
 
- ### citibike_trips: 
+ ### citibike_trips
  58,937,715
- ### citibike_stations: 
+ ### citibike_stations
  2519
 
  ## Relevant date/time coverage
 
- ### citibike_trips:
+ ### citibike_trips
  Trip start times range from July 1, 2013 to May 31, 2018.
 
- ### citibike_stations:  
+ ### citibike_stations
 The last_reported timestamps range from January 2, 1970 to October 14, 2026.
 
 ## Possible IDs or keys
 
 ### citibike_trips
-The table does not contain an explicit trip ID. The combination of bikeid and starttime was evaluated as a candidate key, but a full-table query identified at least 10 duplicated combinations, even after excluding NULL values. A preliminary sampling also revealed missing key values. Therefore, no reliable unique trip identifier has been established. If the duplicated combinations represent repeated records of the same trips, deduplication could make this combination a viable composite key. However further investigation would be needed to confirm its uniqueness.
+The table does not contain an explicit trip ID. The combination of bikeid and starttime was evaluated as a candidate key, but a full-table query identified 12 duplicated combinations, even after excluding null values. A preliminary sampling also revealed missing key values. Therefore, no reliable unique trip identifier has been established. If the duplicated combinations represent repeated records of the same trips, deduplication could make this combination a viable composite key. However further investigation would be needed to confirm its uniqueness.
 
 ### citibike_stations
 The station_id field uniquely identifies each station. All 2,519 records have a non-null distinct station ID, which confirms that station_id is a valid key for the table.
@@ -118,7 +118,7 @@ The station_id column in the stations table could be used to identify the addres
 
 ## Risk 1
 
-Evidence: My preliminary profiling identified missing values in the trip data, and a full-table query found at least 10 duplicated combinations of bikeid and starttime. The table also lacks an explicit trip ID.
+Evidence: My preliminary profiling identified missing values in the trip data, and a full-table query found 12 duplicated combinations of bikeid and starttime. The table also lacks an explicit trip ID.
 
 In P1, I will investigate whether these combinations represent true duplicate trips and determine how missing or duplicated records should be handled to avoid inaccurate trip counts.
 
