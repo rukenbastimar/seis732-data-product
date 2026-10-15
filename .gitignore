@@ -1,0 +1,29 @@
+# Data files and extracts
+data/
+downloads/
+*.csv
+*.parquet
+*.xlsx
+
+# Credentials and sensitive information
+.env
+.env.*
+*credentials*.json
+*service-account*.json
+*.pem
+*.key
+
+# macOS system files
+.DS_Store
+
+# Python temporary files
+__pycache__/
+*.pyc
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Temporary and backup files
+*.tmp
+*.bak
+*~
