@@ -136,13 +136,15 @@ I will monitor estimated query processing costs, select only necessary columns, 
 
 ## Fallback
 
-8. First P1 decision
+If further profiling in P1 reveals that missing or potentially duplicated trip records substantially affect the reliability of the proposed analyses, I will narrow the dashboard to a validated subset of the historical trip data. I could restrict the analysis to complete calendar years and records meeting established data quality criteria to preserve the core analytical questions.
+
+# 8. First P1 decision
 
 My first priority in P1 will be to determine whether duplicated candidate keys represent repeated trip records or distinct trips. Based on these findings, I will establish appropriate deduplication and missing-value handling rules while preserving a clearly defined trip-level fact grain.
 
-9. AI/tool accountability
+# 9. AI/tool accountability
 
-I used ChatGPT to brainstorm potential analytical questions and evaluate the suitability of the Citi Bike dataset. I also asked it to clarify some of the concepts included and to review my written responses. Lastly, when I was close to being them, I asked it to format each file nicely using markdown syntax for a consistent design between all deliverables.
+I used ChatGPT to brainstorm potential analytical questions and evaluate the suitability of the Citi Bike dataset. I also asked it to clarify some of the concepts included and to review my written responses. Lastly, when I was close to being done, I asked it to format each file nicely using markdown syntax for a consistent design between all deliverables.
 
 
 
