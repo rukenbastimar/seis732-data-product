@@ -41,7 +41,17 @@ The results indicate that the candidate identifiers are not ideal, but since the
 
 To move forward with the dataset, I will likely exclude rows with a null bikeid or starttime, but I might need to perform more quality checks on those rows to see if there would be a different way to identify them as unique trips taken. For the 12 rows with duplicated candidate identifiers, it is possible that those indicate bugs or glitches, so I might write a curation rule to include only one of those rows, if it looks like they do represent the same trip taken. The grain states 'one recorded' trip, so while only one trip might have taken place, multiple recordings of that trip might have taken place (erroneously, perhaps), so I believe my grain is still appropriate after reviewing these results.
 
+One additional finding: I wanted to check whether I could label the business process as recording a "completed" trip, and to test that, I counted the number of rows with a null 'stoptime', and got 5,828,994, which is the exact same result for missing bikeid or starttime. This makes me wonder, whether the dataset includes that many fully blank rows. Running such a query to check for a column has about 8 GBs of estimated costs, So I haven't run it yet, but if my suspicion is right, I might just be able to remove those rows once I confirm that they are all (or mostly) blank.
+
 # 2. Define the model and predict a history consequence
+
+Business process: Recording completed Citi Bike trips
+Fact-table type: Transaction fact table
+Grain: One row represents one recorded Citi Bike trip event
+
+A transaction fact table is appropriate because each source record represents an individual recorded trip rather than a periodic summary of activity. This grain supports analysis of trip volume, duration, station demand, and membership patterns.
+
+Modeling choice: As mentioned above, the source does not contain a reliable unique trip identifier. My plan is to assign a warehouse-generated surrogate key to each retained trip record.
 
 # 3. Plan the build and its checks
 

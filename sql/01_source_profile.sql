@@ -33,3 +33,9 @@ SELECT
     ) AS repeated_id_groups
 
 FROM grain_groups;
+
+-- Check number of null values for stoptime (to check for whether the business process includes incomplete trips)
+SELECT
+    COUNT(*)
+FROM `bigquery-public-data.new_york_citibike.citibike_trips`
+WHERE stoptime IS NULL;
