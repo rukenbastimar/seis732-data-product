@@ -86,4 +86,37 @@ Planned P3 test: I could simulate a station name change for one station ID and c
 
 # 3. Plan the build and its checks
 
+## Planned Objects
+
+- Raw: raw_citibike_trips
+    Preserve the original trip records and source fields from the public BigQuery dataset without altering their values.
+
+- Curated: curated_trips
+    Apply data-quality rules, investigate potentially duplicated trips, and prepare eligible trip records for analysis.
+
+- Curated: dim_date
+    Provide calendar attributes derived from trip start dates, including year, month, season, and day of week.
+
+- Curated: dim_time
+    Provide time attributes derived from trip start times, including hour of day.
+
+- Curated: fact_trip
+    Store one row per retained trip event with a warehouse-generated trip_key and foreign keys to the Date and Time dimensions.
+
+- Serving: serving_ridership_trends
+    Aggregate trip counts by date and hour for use in the final data product.
+
+## Preliminary Run Order
+
+1. Raw: Create raw_citibike_trips from the public BigQuery source.
+2. Curated: Apply data-quality and trip-selection rules to create curated_trips.
+3. Dimensions: Populate dim_date and dim_time using valid trip start timestamps.
+4. Fact: Build fact_trip with generated surrogate keys and dimension foreign keys.
+5. Validation: Check fact grain, row counts, and date/time relationships.
+6. Serving: Create serving_ridership_trends with aggregated trip counts.
+7. Visualization: Connect the Serving object to Tableau.
+
 # 4. Diagnose and revise the plan
+
+# AI Note
+
