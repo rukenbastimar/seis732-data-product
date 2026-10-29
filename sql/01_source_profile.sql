@@ -1,6 +1,6 @@
 -- P1: Source Profile
 
--- 1. Test proposed trip fact grain
+-- Test proposed trip fact grain
 -- Candidate identifier: bikeid + starttime
 
 WITH grain_groups AS (
@@ -35,9 +35,37 @@ SELECT
 FROM grain_groups;
 
 -- Check number of null values for stoptime (to check for whether the business process includes incomplete trips)
+
 SELECT
     COUNT(*)
 FROM `bigquery-public-data.new_york_citibike.citibike_trips`
 WHERE stoptime IS NULL;
 
--- 
+-- Check whether station IDs are associated with multiple names across historical trips.
+
+WITH station_observations AS (
+    SELECT
+        start_station_id AS station_id,
+        start_station_name AS station_name
+    FROM `bigquery-public-data.new_york_citibike.citibike_trips`
+
+    UNION ALL
+
+    SELECT
+        end_station_id AS station_id,
+        end_station_name AS station_name
+    FROM `bigquery-public-data.new_york_citibike.citibike_trips`
+)
+
+SELECT
+    station_id,
+    COUNT(DISTINCT station_name) AS distinct_names,
+    ARRAY_AGG(
+        DISTINCT station_name IGNORE NULLS
+        ORDER BY station_name
+    ) AS observed_names
+FROM station_observations
+WHERE station_id IS NOT NULL
+GROUP BY station_id
+HAVING COUNT(DISTINCT station_name) > 1
+ORDER BY distinct_names DESC, station_id;
