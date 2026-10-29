@@ -39,3 +39,5 @@ SELECT
     COUNT(*)
 FROM `bigquery-public-data.new_york_citibike.citibike_trips`
 WHERE stoptime IS NULL;
+
+-- 
