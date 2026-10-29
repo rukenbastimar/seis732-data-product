@@ -10,3 +10,9 @@ This project explores historical NYC Citi Bike ridership data using Google BigQu
 - [Feasibility SQL](sql/00_feasibility.sql) — SQL queries used to profile and validate the source data.
 - [Feasibility Results](evidence/p0-feasibility-results.md) — Query results and observations supporting the feasibility assessment.
 
+## P1 Files
+
+- [P1 Modeling Plan](docs/p1-plan.md) — P1 plan.
+- [Dimensional Model Diagram](docs/model.png) — Dimensional model for the primary question.
+- [P1 Source Profile SQL](sql/01_source_profile.sql) — SQL queries used to validate the proposed fact grain and investigate source data quality.
+
