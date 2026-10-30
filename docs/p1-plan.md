@@ -175,6 +175,6 @@ I also refined my Serving layer to include separate monthly, seasonal, and daily
 
 ## AI use
 
-I used AI to help me identify gaps in my P1 plans and decisions by running them through it, and questioning its response. If it agreed with me, I asked it follow-up questions to poke it further and identify areas that I might have been overlooking. I also used it to revise my grammar, create markdown style tables and review SQL syntax. Some of the SQL clauses were outside of my comfort zone so I had AI complete the query asked it to explain how it worked.  
+I used AI to help me identify gaps in my P1 plans and decisions by running them through it, and questioning its response. If it agreed with me, I asked it follow-up questions to poke it further and identify areas that I might have been overlooking. I also used it to revise my grammar, create markdown style tables and review SQL syntax. Some of the SQL clauses were outside of my comfort zone so I had AI complete the query and asked it to explain how it worked.  
 
 
