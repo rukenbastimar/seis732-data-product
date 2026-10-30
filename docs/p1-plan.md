@@ -31,11 +31,11 @@ How does trip volume vary by month, season, year, day of week and hour of day?
 
 - Candidate identifier: `bikeid` and `starttime`
 - Rows with missing candidate identifier
-    Expected: 0 for a valid identifier
-    Observed: 5,828,994
+Expected: 0 for a valid identifier
+Observed: 5,828,994
 - Repeated non-null identifier groups
-    Expected: 0 for a unique identifier
-    Observed: 12
+Expected: 0 for a unique identifier
+Observed: 12
 
 The initial results indicated that the candidate identifiers are not ideal, since the dataset does not include a unique trip id or another surrogate key. Looking at the columns in the table, `bikeid` combined with the start time of a trip (`starttime`), should, in theory, reflect a unique trip event, since a bike can only be occupied once at a given time. 
 
@@ -45,30 +45,30 @@ One additional finding: I wanted to check whether I could label the business pro
 
 # 2. Define the model and predict a history consequence
 
-Business process: Recording completed Citi Bike trips
-Fact-table type: Transaction fact table
-Grain: One row represents one recorded Citi Bike trip event
+**Business process**: Recording completed Citi Bike trips
+**Fact-table type**: Transaction fact table
+**Grain**: One row represents one recorded Citi Bike trip event
 
 A transaction fact table is appropriate because each source record represents an individual recorded trip rather than a periodic summary of activity. This grain supports analysis of historical trip volume, duration, station demand, and membership patterns.
 
-Modeling choice: As mentioned above, the source does not contain a reliable unique trip identifier, and has about 5.8 million blank rows. My plan is to assign a warehouse-generated surrogate key to each retained trip record once all the missing and duplicate records are handled. 
+**Modeling choice**: As mentioned above, the source does not contain a reliable unique trip identifier, and has about 5.8 million blank rows. My plan is to assign a warehouse-generated surrogate key to each retained trip record once all the missing and duplicate records are handled. 
 
 Secondly, I will use the trip start date and time to assign each trip to a reporting period. This allows trip volume to reflect when riders initiate trips, which is useful for identifying ridership demand patterns. With this convention, trips spanning multiple hours or dates will be counted only in the period when they began, rather than across their entire duration.
 
 My primary question was: How does trip volume vary by month, season, year, day of week and hour of day?
 
 Table: **FACT_TRIP**
-Key strategy: trip_key (a warehouse-generated surrogate primary key)
-Attributes: start_date_key FK , start_time_key FK
-Source identifiers: `bikeid`, `starttime`
+- Key strategy: `trip_key` (a warehouse-generated surrogate primary key)
+- Attributes: `start_date_key` FK , `start_time_key` FK
+- Source identifiers: `bikeid`, `starttime`
 
 Table: **DIM_DATE**
-Key strategy: `date_key` uniquely identifies a calendar date
-Attributes: `year`, `month`, `season`, `day_of_week`
+- Key strategy: `date_key` uniquely identifies a calendar date
+- Attributes: `year`, `month`, `season`, `day_of_week`
 
 Table: **DIM_TIME**
-Key strategy: `time_key` uniquely identifies a time of day
-Attributes: `hour`, `minute`
+- Key strategy: `time_key` uniquely identifies a time of day
+- Attributes: `hour`, `minute`
 
 The primary question will be answered by counting rows in FACT_TRIP using COUNT(*), after applying data-quality rules to retain distinct trip events. FACT_TRIP will join to DIM_DATE through start_date_key and to DIM_TIME through start_time_key. Attributes such as year, month, season, and day of week will come from DIM_DATE and hour of day will come from DIM_TIME. The results can be grouped by these attributes and filtered by selected date ranges or time periods to identify historical ridership patterns.
 
@@ -82,7 +82,7 @@ The Date dimension would be shared across the model, with the trip start date us
 
 Reporting consequence: Station history would not affect my primary question, since trip volume by year, month, season, day of week, and hour is calculated using trip start dates and times. However, it would affect station-level reporting by preserving the historical names and locations associated with trips rather than applying the latest station information to all historical records. Similarly, I might need to apply similar modeling to longitude and latitude, if they also change over time for station IDs.
 
-Planned P3 test: I could simulate a station name change for one station ID and create two Type 2 dimension records with different warehouse keys and effective date ranges. Using a small sample of trips before and after the change, I would verify that each trip is associated with the appropriate station version.
+**Planned P3 test**: I could simulate a station name change for one station ID and create two Type 2 dimension records with different warehouse keys and effective date ranges. Using a small sample of trips before and after the change, I would verify that each trip is associated with the appropriate station version.
 
 # 3. Plan the build and its checks
 
@@ -99,31 +99,37 @@ Planned P3 test: I could simulate a station name change for one station ID and c
 | Serving | `serving_seasonal_ridership` | Aggregate trip counts by year and season to compare seasonal ridership patterns. |
 | Serving | `serving_daily_hourly_ridership` | Aggregate trip counts by calendar date and hour, supporting day-of-week, weekday/weekend, and hourly comparisons, including average daily demand. |
 
-## Preliminary Run Order
+## **Preliminary Run Order**
 
-1. Raw: Create raw_citibike_trips from the public BigQuery source.
-2. Curated: Apply data-quality and trip-selection rules to create curated_trips.
-3. Dimensions: Populate dim_date and dim_time using valid trip start timestamps.
-4. Fact: Build fact_trip with generated surrogate keys and dimension foreign keys.
-5. Validation: Check fact grain, row counts, and date/time relationships.
-6. Serving: Create serving_ridership_trends with aggregated trip counts.
-7. Visualization: Connect the Serving object to Tableau (or another visualization tool).
+1. **Raw:** Create `raw_citibike_trips` from the public BigQuery source.
+2. **Curated:** Apply data-quality and trip-selection rules to create `curated_trips`.
+3. **Dimensions:** Populate `dim_date` and `dim_time` using valid trip start timestamps.
+4. **Fact:** Build `fact_trip` with a generated surrogate key and foreign keys to the Date and Time dimensions.
+5. **Validation:** Check fact grain, row counts, and date/time relationships.
+6. **Serving:** Create three aggregated tables:
+   - `serving_monthly_ridership`: Aggregate trip counts by year and month.
+   - `serving_seasonal_ridership`: Aggregate trip counts by year and season.
+   - `serving_daily_hourly_ridership`: Aggregate trip counts by calendar date and hour.
+7. **Visualization:** Connect the three Serving tables to Tableau (or another visualization tool).
 
-## Field Trace: citibike_trips.starttime
+## **Field Trace: citibike_trips.starttime**
 
-1. Raw - raw_citibike_trips: the original `starttime` values are preserved without modification.
-2. Curated — curated_trips: `starttime` is validation and trip eligibility and duplicate-handling rules are applied.
-3. Curated — dim_date: year, month, season, and day of week are derived from the date portion of `starttime`.
-4. Curated — dim_time: hour of day is derived from the time portion of `starttime`.
-5. Curated — fact_trip: each retained trip is assigned a warehouse-generated `trip_key` and foreign keys are assigned to the corresponding Date and Time dimension records.
-6. Serving: trip volume is calculated using COUNT(*) and aggregated by the relevant Date and Time attributes in serving_monthly_ridership, serving_seasonal_ridership, and serving_daily_hourly_ridership.
-7. Audience output: historical ridership trends are displayed in a visualization tool, allowing the Citi Bike operations planning team to compare trip volume by year, month, season, day of week, and hour.
+1. **Raw — `raw_citibike_trips`:** Preserve the original `starttime` values without modification.
+2. **Curated — `curated_trips`:** Validate `starttime` and apply trip eligibility and duplicate-handling rules.
+3. **Curated — `dim_date`:** Derive year, month, season, and day of week from the date portion of `starttime`.
+4. **Curated — `dim_time`:** Derive hour of day from the time portion of `starttime`.
+5. **Curated — `fact_trip`:** Assign each retained trip a warehouse-generated `trip_key` and foreign keys to the corresponding Date and Time dimension records.
+6. **Serving:** Calculate trip volume using `COUNT(*)` and aggregate it into three tables:
+   - `serving_monthly_ridership`: Group by year and month to support monthly and annual trends.
+   - `serving_seasonal_ridership`: Group by year and season to support seasonal comparisons.
+   - `serving_daily_hourly_ridership`: Group by calendar date and hour to support day-of-week, weekday/weekend, and hourly comparisons.
+7. **Audience Output:** Display historical ridership trends in Tableau, allowing the Citi Bike operations planning team to compare trip volume by year, month, season, day of week, and hour.
 
 ## Project-Specific Risks and Planned Checks
 
 **Risk 1: Missing or repeated trip identifiers (grain)**
 
-The source does not have a unique trip ID. My P1 grain test identified 5,828,994 rows with a missing `bikeid` or `starttime`, and 12 repeated `(`bikeid`, `starttime`)` groups. I plan to exclude records missing either identifier field and investigate repeated combinations before retaining trips.
+The source does not have a unique trip ID. My P1 grain test identified 5,828,994 rows with a missing `bikeid` or `starttime`, and 12 repeated (`bikeid`, `starttime`) groups. I plan to exclude records missing either identifier field and investigate repeated combinations before retaining trips.
 
 - **Planned check:** Verify that `curated_trips` contains no null `bikeid` or `starttime` values and no unintended repeated `(`bikeid`, `starttime`)` combinations. Reconcile retained trip counts between `curated_trips` and `fact_trip`.
 - **Expected result:** All retained trips have complete identifiers, no unintended duplicates remain, and each retained trip corresponds to exactly one fact row.
@@ -161,6 +167,6 @@ I also refined my Serving layer to include separate monthly, seasonal, and daily
 
 ## AI Use
 
-I used AI to help me identify gaps in my P1 plans and decisions by running them through it, and questioning its response. If it agreed with me, I asked it follow-up questions to poke it further and identify areas that I might have been overlooking. I also used it to create markdown style tables and review SQL syntax. Some of the SQL clauses were outside of my comfort zone so I had AI complete the query. 
+I used AI to help me identify gaps in my P1 plans and decisions by running them through it, and questioning its response. If it agreed with me, I asked it follow-up questions to poke it further and identify areas that I might have been overlooking. I also used it to revise my grammar, create markdown style tables and review SQL syntax. Some of the SQL clauses were outside of my comfort zone so I had AI complete the query asked it to explain how it worked.  
 
 
