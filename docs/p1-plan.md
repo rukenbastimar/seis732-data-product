@@ -17,25 +17,33 @@ How does trip volume vary by month, season, year, day of week and hour of day?
 
 ## Source identifiers
 
-- Source provider: Citi Bike New York / Google Cloud BigQuery Public Datasets
-- Source project: bigquery-public-data
-- Source dataset: new_york_citibike
-- Source URL: [New York Citi Bike](https://console.cloud.google.com/bigquery?p=bigquery-public-data&d=new_york_citibike&page=dataset&project=seis-732-508001&ws=!1m5!1m4!3m2!1sbigquery-public-data!2snew_york_citibike!23sLEGACY_URL_PARAM)
-- Primary source table: citibike_trips
-- Data location: US
-- Execution project: seis-732-508001
+### Dataset information
 
-- Grain: One row represents one recorded Citi Bike trip event.
-- Row count: 58,937,715
-- Date range: July 1, 2013 to May 31, 2018 (based on recorded trip times).
+| Field | Value |
+|---|---|
+| Source provider | Citi Bike New York / Google Cloud BigQuery Public Datasets |
+| Source project | `bigquery-public-data` |
+| Source dataset | `new_york_citibike` |
+| Source URL | [New York Citi Bike](https://console.cloud.google.com/bigquery?p=bigquery-public-data&d=new_york_citibike&page=dataset&project=seis-732-508001&ws=!1m5!1m4!3m2!1sbigquery-public-data!2snew_york_citibike!23sLEGACY_URL_PARAM) |
+| Primary source table | `citibike_trips` |
+| Data location | US |
+| Execution project | `seis-732-508001` |
 
-- Candidate identifier: `bikeid` and `starttime`
-- Rows with missing candidate identifier
-Expected: 0 for a valid identifier
-Observed: 5,828,994
-- Repeated non-null identifier groups
-Expected: 0 for a unique identifier
-Observed: 12
+### Source table profile
+
+| Attribute | Value |
+|---|---|
+| Grain | One row represents one recorded Citi Bike trip event. |
+| Row count | 58,937,715 |
+| Date range | July 1, 2013 to May 31, 2018 (based on recorded trip times). |
+| Candidate identifier | `bikeid` and `starttime` |
+
+### Candidate identifier validation
+
+| Check | Expected | Observed |
+|---|---|---|
+| Rows with missing candidate identifier | 0 for a valid identifier | 5,828,994 |
+| Repeated non-null identifier groups | 0 for a unique identifier | 12 |
 
 The initial results indicated that the candidate identifiers are not ideal, since the dataset does not include a unique trip id or another surrogate key. Looking at the columns in the table, `bikeid` combined with the start time of a trip (`starttime`), should, in theory, reflect a unique trip event, since a bike can only be occupied once at a given time. 
 
@@ -86,7 +94,7 @@ Reporting consequence: Station history would not affect my primary question, sin
 
 # 3. Plan the build and its checks
 
-## Planned Objects
+## Planned objects
 
 | Layer | Planned Object | Purpose |
 |---|---|---|
@@ -125,7 +133,7 @@ Reporting consequence: Station history would not affect my primary question, sin
    - `serving_daily_hourly_ridership`: Group by calendar date and hour to support day-of-week, weekday/weekend, and hourly comparisons.
 7. **Audience Output:** Display historical ridership trends in Tableau, allowing the Citi Bike operations planning team to compare trip volume by year, month, season, day of week, and hour.
 
-## Project-Specific Risks and Planned Checks
+## Project-specific risks and planned checks
 
 **Risk 1: Missing or repeated trip identifiers (grain)**
 
@@ -143,13 +151,13 @@ Incorrect date/time transformations or dimension joins could misrepresent riders
 - **Expected result:** Counts match for equivalent periods, with no missing dimension relationships or unintended duplication.
 - **Where:** BigQuery, after building `fact_trip` and the Serving tables in P2/P3.
 
-## Access and Data Governance
+## Access and data governance
 
 The `starttime` field comes from the public BigQuery Citi Bike dataset and is low-risk for this project, so restricted access is not needed. The intended users of the final dashboard are the Citi Bike operations planning team and a designated data or analytics team member serving as the proposed data steward.
 
 The original `starttime` field will not appear in the final dashboard at the individual trip level. Its derived attributes will be displayed alongside aggregated trip counts.
 
-## Remaining Limitation and Next P2 Step
+## Remaining limitation and next P2 step
 
 The largest remaining limitation is the historical coverage of the dataset, which ends in May 2018 and includes incomplete years at both ends of the reporting period. This limits the dashboard's usefulness for current operational planning and requires careful interpretation of annual and seasonal comparisons.
 
@@ -157,7 +165,7 @@ My first P2 build step will be to creat the `raw_citibike_trips` table to preser
 
 # 4. Diagnose and revise the plan
 
-## Peer Feedback and Change Memo
+## Peer feedback and change memo
 
 During the M07 peer review, my partner and I discussed the intended audience for my data product. She brought up the possibility of urban transportation planners as an alternative audience rather than Citi Bike's operations planning team. This made me reconsider whether my proposed questions would be useful beyond Citi Bike's internal operations.
 
@@ -165,7 +173,7 @@ I decided to retain the operations planning team as my primary audience because 
 
 I also refined my Serving layer to include separate monthly, seasonal, and daily/hourly ridership summaries. The main uncertainty that remains is how to handle repeated trip identifiers during curation.
 
-## AI Use
+## AI use
 
 I used AI to help me identify gaps in my P1 plans and decisions by running them through it, and questioning its response. If it agreed with me, I asked it follow-up questions to poke it further and identify areas that I might have been overlooking. I also used it to revise my grammar, create markdown style tables and review SQL syntax. Some of the SQL clauses were outside of my comfort zone so I had AI complete the query asked it to explain how it worked.  
 
