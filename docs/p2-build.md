@@ -27,19 +27,19 @@
 | Date range | July 1, 2013 to May 31, 2018 (based on recorded trip times). |
 | Candidate identifier | `bikeid` and `starttime` |
 
-## Source to Raw load choices
-
 | Decision | My choice | Why it fits this source |
-| Source format and header row | Native BigQuery table; no header handling required | The source is an existing table in the BigQuery Public Datasets project. Since the column names and data types are already defined, header-row settings are not applicable.
-| Declared types for composite ID | bikeid: INTEGER; starttime: DATETIME | The combination of `bikeid` and `starttime` serves as the proposed composite trip identifier. These fields are preserved from the source and duplicate combinations will be addressed during curation.
+|---|---|---|
+| Source format and header row | Native BigQuery table; no header handling required | The source is an existing table in the BigQuery Public Datasets project. Since the column names and data types are already defined, header-row settings are not applicable. |
+| Declared types for composite ID | bikeid: INTEGER; starttime: DATETIME | The combination of `bikeid` and `starttime` serves as the proposed composite trip identifier. These fields are preserved from the source and duplicate combinations will be addressed during curation. |
 | Empty fields and invalid records | Allow NULL values and empty-string values in partially populated records; exclude fully blank records | Missing values in certain columns (such as gender) are not consequential to the primary analysis. Partially populated records are retained for downstream quality assessment. Records with no populated fields are excluded during ingestion because they provide no usable trip information. |
-| Load into BigQuery or query the source in place | Load into a native BigQuery table | A native table provides a stable version of the source data, which supports reproducible curation and analysis without repeating querying the public source.
-Append or replace on repeated loads | CREATE OR REPLACE TABLE | Replacing the raw table prevents duplicate records from being introduced when reloading the same source table. |
+| Load into BigQuery or query the source in place | Load into a native BigQuery table | A native table provides a stable version of the source data, which supports reproducible curation and analysis without repeating querying the public source. |
+| Append or replace on repeated loads | CREATE OR REPLACE TABLE | Replacing the raw table prevents duplicate records from being introduced when reloading the same source table. |
 | Source-to-Raw filtering | CREATE OR REPLACE TABLE ... AS SELECT with a WHERE condition | The query excludes records where all fields are NULL or blank while preserving partially populated records and duplicate composite identifiers for the curated layer. |
 
-[IngestionSQL] (sql/02_ingest.sql#L1-L39)
-Source row count: 58,937,715
-Raw row count: 53,108,721
+[IngestionSQL](sql/02_ingest.sql#L1-L39)
+
+Source row count: 58,937,715  
+Raw row count: 53,108,721  
 Total rows excluded: 5,828,994
 
 The excluded row count matches my prediction in p2.
