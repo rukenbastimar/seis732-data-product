@@ -37,3 +37,8 @@ WHERE
 -- Step 3: Verify resulting row count (Result: 53,108,721)
 SELECT COUNT(*) AS raw_row_count
 FROM `seis-732-508001.raw.raw_citibike_trips`;
+
+-- Step 4: Create a snapshot named raw_citibike_trips_initial_snapshot for comparison and recovery.
+CREATE SNAPSHOT TABLE `seis-732-508001.raw.raw_citibike_trips_initial_snapshot`
+  CLONE
+    `seis-732-508001.raw.raw_citibike_trips`;
