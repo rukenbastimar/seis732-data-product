@@ -60,3 +60,18 @@ The active Raw table serves as the input for downstream curation. The snapshot i
 Since the public source is externally maintained, future ingestion runs may produce different results. The snapshot preserves the initial Raw population.
 
 Creation date: Nov 15, 2026, 10:21:33 PM UTC-6
+
+# 2. Build Curated at the intended grain
+
+## Curated objects
+
+## Curated row grain
+
+## Curation rules
+
+## Curated row count
+
+## Curation vs. Raw
+
+## Field trace from P1
+
