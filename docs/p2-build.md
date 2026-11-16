@@ -39,11 +39,11 @@
 
 ## Source-to-Raw reproducibility
 
-[Ingestion SQL: 02_ingest.sql](sql/02_ingest.sql#L1-L39)
+[Ingestion SQL: 02_ingest.sql](sql/02_ingest.sql)
 
 Source: bigquery-public-data.new_york_citibike.citibike_trips
-Source row count: 58,937,715  
-Raw row count: 53,108,721  
+Source row count: 58,937,715
+Raw row count: 53,108,721
 Rows excluded during ingestion: 5,828,994
 
 ### Raw row grain
