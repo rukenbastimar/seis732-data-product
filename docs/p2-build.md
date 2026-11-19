@@ -95,7 +95,7 @@ This rule ensures that each composite trip identifier appears only once in Curat
 
 Given the small number of affected records relative to the overall dataset, I consider this a reasonable approach.
 
-**Curation implementation:** [03_curate.sql](sql/03_curate.sql)
+[Curation SQL: 03_curate.sql](../sql/03_curate.sql)
 
 ### 2. Validating timestamps
 
@@ -150,7 +150,7 @@ I will implement three data-quality flags in Curated:
 
 These thresholds are intended to identify records for further review, not to establish that they are invalid. This approach preserves trip counts while making potentially problematic observations identifiable for future investigation.
 
-**Curation implementation:** [03_curate.sql](sql/03_curate.sql)
+[Curation SQL: 03_curate.sql](../sql/03_curate.sql)
 
 ## Curated objects
 
@@ -173,15 +173,14 @@ I created the rules below based on my p2 profiling and subsequent investigations
 | **Duplicate records** | Of the 12 pairs, 11 had different durations, and one also had a different end station. | Retain the record with the latest `stoptime`, then longest `tripduration`, then highest deterministic full-row hash if needed. | Resolves repeated identifiers consistently without assuming the selected record is necessarily more accurate. |
 | **Timestamp types** | `starttime` and `stoptime` are already stored as `DATETIME`, with varying fractional-second precision. | Preserve both fields and their existing data types. | BigQuery already supports the observed precision, so conversion or standardization is unnecessary. |
 | **Missing timestamps** | No NULL values were identified in `starttime` or `stoptime` across 53,108,721 Raw records. | No missing-timestamp replacement or exclusion rule is required. | All Raw records have the timestamps needed for temporal analysis. |
-| **Date and hour derivation** | `starttime` provides the date and time associated with each trip's beginning. | Derive `trip_date` using `DATE(starttime)` and `trip_hour` using `EXTRACT(HOUR FROM starttime)`. | Supports grouping trips by calendar date and hour without altering the original timestamp. |
 | **Duration discrepancies** | 799 Raw records had differences greater than 60 seconds between reported and calculated duration. Some discrepancies may be related to daylight saving time. | Calculate the elapsed duration and flag differences greater than 60 seconds using `duration_review_flag`. | Identifies potentially inconsistent records without assuming every discrepancy is an error. |
-| **Chronological inconsistencies** | 119 Raw records had `stoptime` earlier than `starttime`. | Flag these records using `chronology_review_flag`. | Identifies implausible timestamp sequences for review. |
+| **Chronological inconsistencies** | 119 Raw records had `stoptime` earlier than `starttime`. Some discrepancies may be related to daylight saving time. | Flag these records using `chronology_review_flag`. | Identifies implausible timestamp sequences for review. |
 | **Unusually long trips** | 11,513 Raw records had durations exceeding 24 hours; the maximum was approximately 226 days. | Flag trips exceeding 86,400 seconds using `long_duration_review_flag`. | Identifies unusually long rentals that may reflect operational or recording issues. |
 | **Missing nonessential attributes** | Fields such as `gender` and `customer_plan` are not required to answer the primary question. | Preserve these attributes, including missing values, without using them as exclusion criteria. | Avoids unnecessarily reducing trip counts based on attributes unrelated to date/time analysis. |
 | **Final Curated eligibility** | Some deduplicated records fail one or more duration or chronology checks. | Preserve all deduplicated records and their flags in the intermediate table. Exclude records with any of the three flags from the final Curated table. | Establishes a consistent quality-filtered analytical population while retaining excluded observations for review. |
 | **Relationships and joins** | Curation is performed using a single Raw trip table. | No joins are performed in Curated. Fact and dimension relationships will be implemented in Serving. | Preserves the intended grain and avoids introducing row multiplication during curation. |
 
-**Implementation:** [03_curate.sql](sql/03_curate.sql)
+[Curation SQL: 03_curate.sql](../sql/03_curate.sql)
 
 ## Curated row count
 
